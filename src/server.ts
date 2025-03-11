@@ -1,25 +1,50 @@
-import { createTransport } from "@smithery/sdk";
+// @ts-nocheck
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+import express from "express";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
+import {
+  ReadResourceResultSchema,
+  ListResourcesResultSchema,
+} from "@modelcontextprotocol/sdk/types.js";
 
-async function run() {
-  const transport = createTransport(
-    "https://server.smithery.ai/@smithery-ai/server-sequential-thinking",
-    {}
-  );
+const app = express();
+const port = 3000;
+app.use(express.json());
 
-  // Create MCP client
+app.post("/call-mcp", async (req, res) => {
+  try {
+    const { mcpName, method } = req.body;
+    console.log("Requesting resources list...");
 
-  const client = new Client({
-    name: "Test client",
-    version: "1.0.0",
-  });
-  await client.connect(transport);
+    //init client for per mcp
+    const pathSourceMcp = `src/${mcpName}/index.ts`;
+    const client = new Client(
+      {
+        name: "example-client",
+        version: "1.0.0",
+      },
+      { capabilities: {} }
+    );
 
-  // Use the server tools with your LLM application
-  const tools: any = await client.listTools();
-  console.log(`Available tools:  ${JSON.stringify(tools)}`);
+    const transport = new StdioClientTransport({
+      command: "npx",
+      args: ["ts-node", `${pathSourceMcp}`],
+    });
+    await client.connect(transport);
+    console.log("🚀 MCP Client connected!");
 
-  // Example: Call a tool
-  // const result = await client.callTool("tool_name", { param1: "value1" })
-}
-run();
+    const resources = await client.request(
+      { method: method },
+      ListResourcesResultSchema
+    );
+    res.json(resources);
+  } catch (error) {
+    console.error("Error listing resources:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.listen(port, async () => {
+  console.log(`🚀 Express Server run http://localhost:${port}`);
+});
