@@ -1,0 +1,13 @@
+{
+  "name": "original-server",
+  "env": {
+    "MCP_CLIENT_NAME": "required",
+    "MCP_CLIENT_VERSION": "optional"
+  },
+  "type": "stdio",
+  "command": "node",
+  "args": [
+    "./node_modules/.bin/ts-node-dev",
+    "src/mcp-registry-poc/containers/stdio-server/server.ts"
+  ]
+}
