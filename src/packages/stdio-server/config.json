@@ -6,8 +6,5 @@
   },
   "type": "stdio",
   "command": "node",
-  "args": [
-    "./node_modules/.bin/ts-node-dev",
-    "src/mcp-registry-poc/containers/stdio-server/server.ts"
-  ]
+  "args": ["./node_modules/.bin/ts-node-dev", "./server.ts"]
 }
